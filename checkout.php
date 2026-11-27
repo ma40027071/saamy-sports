@@ -34,11 +34,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
     if ($old['customer_name'] === '') {
         $errors[] = 'Customer name is required.';
     }
-    if (!preg_match('/^[0-9]{10,15}$/', preg_replace('/[\s\-+]/', '', $old['phone']))) {
+    if (!preg_match('/^[6-9][0-9]{9}$/', preg_replace('/\D/', '', $old['phone']))) {
         $errors[] = 'Please enter a valid phone number.';
     }
-    if ($old['address'] === '' || $old['city'] === '' || $old['pincode'] === '') {
-        $errors[] = 'Complete delivery address, city, and pincode are required.';
+    if ($old['address'] === '' || $old['city'] === ''){
+        $errors[] = 'Complete delivery address and city are required.';
+    }elseif (!preg_match('/^[1-9][0-9]{5}$/', preg_replace('/\D/', '', $old['pincode']))) {
+        $errors[] = 'Please enter a valid pincode.';
     }
     if (!in_array($old['payment_method'], ['COD', 'WHATSAPP'], true)) {
         $old['payment_method'] = 'COD';
@@ -98,10 +100,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             $orderStmt->execute([
                 ':order_number' => $orderNumber,
                 ':customer_name'=> $old['customer_name'],
-                ':phone'        => $old['phone'],
+                ':phone'        =>preg_replace('/\D/', '', $old['phone']),
                 ':address'      => $old['address'],
                 ':city'         => $old['city'],
-                ':pincode'      => $old['pincode'],
+                ':pincode'      =>preg_replace('/\D/', '', $old['pincode']),
                 ':total_amount' => $verifiedTotal,
                 ':payment_method'=> $old['payment_method'],
                 ':payment_status'=> $paymentStatus,
@@ -205,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             <input type="text" id="customer_name" name="customer_name" value="<?= htmlspecialchars($old['customer_name']) ?>" required>
 
             <label for="phone">Phone / WhatsApp Number *</label>
-            <input type="text" id="phone" name="phone" value="<?= htmlspecialchars($old['phone']) ?>" placeholder="e.g. 9876543210" required>
+            <input type="tel" id="phone" name="phone" maxlength="10" pattern="[6-9][0-9]{9}" inputmode="numeric" placeholder="e.g. 9876543210" value="<?= htmlspecialchars($old['phone']) ?>" required>
 
             <label for="address">Street Address / Landmark *</label>
             <textarea id="address" name="address" rows="3" required><?= htmlspecialchars($old['address']) ?></textarea>
@@ -214,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             <input type="text" id="city" name="city" value="<?= htmlspecialchars($old['city']) ?>" required>
 
             <label for="pincode">Pincode *</label>
-            <input type="text" id="pincode" name="pincode" value="<?= htmlspecialchars($old['pincode']) ?>" required>
+            <input type="text" id="pincode" name="pincode" maxlength="6" pattern="[1-9][0-9]{5}" inputmode="numeric" placeholder="e.g. 123456" value="<?= htmlspecialchars($old['pincode']) ?>" required>
 
             <label for="payment_method">Order Mode</label>
             <select id="payment_method" name="payment_method">
@@ -245,5 +247,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
         </div>
     </div>
 </main>
+<script>
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
+        });
+    }
+
+    // Optional: Add client-side validation or enhancements here
+
+    const pincodeInput = document.getElementById('pincode');
+    if (pincodeInput) {
+        pincodeInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 6);
+        });
+    }
+</script>
 </body>
 </html>

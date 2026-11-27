@@ -19,8 +19,11 @@ if ($category !== 'All') {
 }
 
 if ($search !== '') {
-    $sql .= " AND (name LIKE :search OR description LIKE :search)";
-    $params[':search'] = '%' . $search . '%';
+    $likeSearch = '%' . $search . '%';
+    $sql .= " AND (name LIKE :search_name OR description LIKE :search_desc OR category LIKE :search_category)";
+    $params[':search_name'] = $likeSearch;
+    $params[':search_desc'] = $likeSearch;
+    $params[':search_category'] = $likeSearch;
 }
 
 $sql .= " ORDER BY id DESC";
@@ -122,9 +125,7 @@ if (!empty($_SESSION['cart'])) {
         <?php foreach ($categories as $cat): ?>
             <?php
                 $url = 'index.php?category=' . urlencode($cat);
-                if ($search !== '') {
-                    $url .= '&q=' . urlencode($search);
-                }
+              
             ?>
             <a href="<?= htmlspecialchars($url) ?>"
                class="btn btn-outline <?= $category === $cat ? 'active' : '' ?>">

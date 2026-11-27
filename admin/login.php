@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['admin_logged_in'] = true;
             $_SESSION['admin_id'] = (int)$admin['id'];
             $_SESSION['admin_username'] = $admin['username'];
-            header('Location: products.php');
+            header('Location: dashboard.php');
             exit;
         } else {
             $error = 'Invalid admin credentials.';
